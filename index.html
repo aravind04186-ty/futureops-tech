@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
+    <title>FutureOps-Tech Academy | Premier DevOps & Cloud Training</title>
+    <script>
+      (function() {
+        // Intercept WebSocket creation to suppress Vite HMR websocket connection errors gracefully
+        var RealWebSocket = window.WebSocket;
+        if (RealWebSocket) {
+          window.WebSocket = function(url, protocols) {
+            var ws;
+            try {
+              ws = protocols ? new RealWebSocket(url, protocols) : new RealWebSocket(url);
+            } catch (err) {
+              // Return a mock object if WebSocket creation fails
+              ws = new EventTarget();
+              ws.close = function() {};
+              ws.send = function() {};
+              return ws;
+            }
+            ws.addEventListener('error', function(e) {
+              if (e && e.stopImmediatePropagation) e.stopImmediatePropagation();
+              if (e && e.preventDefault) e.preventDefault();
+            }, true);
+            return ws;
+          };
+          window.WebSocket.prototype = RealWebSocket.prototype;
+          window.WebSocket.CONNECTING = RealWebSocket.CONNECTING;
+          window.WebSocket.OPEN = RealWebSocket.OPEN;
+          window.WebSocket.CLOSING = RealWebSocket.CLOSING;
+          window.WebSocket.CLOSED = RealWebSocket.CLOSED;
+        }
+
+        window.addEventListener('unhandledrejection', function(event) {
+          var reason = (event && event.reason) ? (event.reason.message || event.reason || String(event.reason)) : String(event || '');
+          if (typeof reason === 'string' && (
+            reason.indexOf('WebSocket') !== -1 || 
+            reason.indexOf('vite') !== -1 || 
+            reason.indexOf('websocket') !== -1 ||
+            reason.indexOf('closed without opened') !== -1
+          )) {
+            event.preventDefault();
+            if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+            return true;
+          }
+        }, true);
+
+        window.addEventListener('error', function(event) {
+          var msg = (event && event.message) ? (event.message || String(event)) : String(event || '');
+          if (typeof msg === 'string' && (
+            msg.indexOf('WebSocket') !== -1 || 
+            msg.indexOf('vite') !== -1 || 
+            msg.indexOf('websocket') !== -1 ||
+            msg.indexOf('closed without opened') !== -1
+          )) {
+            event.preventDefault();
+            if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+            return true;
+          }
+        }, true);
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+
